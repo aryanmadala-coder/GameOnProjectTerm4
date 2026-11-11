@@ -27,3 +27,59 @@ var sparks = [];
 var twoPlayer = false;
 var audio = null;
 var frame = 0;
+
+// ---------- SOUND (made with code, so no copyright issues) ----------
+function beep(freq, length, volume) {
+  if (!audio) return;
+  var osc = audio.createOscillator();
+  var gain = audio.createGain();
+  osc.frequency.value = freq;
+  gain.gain.value = volume;
+  osc.connect(gain);
+  gain.connect(audio.destination);
+  osc.start();
+  osc.stop(audio.currentTime + length);
+}
+
+// background music: a simple repeating tune
+var notes = [131, 165, 196, 165, 131, 165, 196, 262];
+var noteNumber = 0;
+setInterval(function () {
+  if (state == "play") {
+    beep(notes[noteNumber % 8], 0.3, 0.05);
+    noteNumber++;
+  }
+}, 400);
+
+// ---------- HELPER FUNCTIONS ----------
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+// is this spot inside a rock?
+function hitsRock(x, y) {
+  var rocks = levels[level].rocks;
+  for (var i = 0; i < rocks.length; i++) {
+    var r = rocks[i];
+    if (x + 12 > r[0] && x - 12 < r[0] + r[2] && y + 12 > r[1] && y - 12 < r[1] + r[3]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// pick a random spot that is not inside a rock
+function freeSpot() {
+  var x, y;
+  do {
+    x = 40 + Math.random() * 720;
+    y = 40 + Math.random() * 420;
+  } while (hitsRock(x, y));
+  return { x: x, y: y };
+}
+
+// ---------- STARTING THE GAME ----------
+function makePlayer(color, up, down, left, right) {
+  return { x: 100, y: 250, color: color, up: up, down: down, left: left, right: right,
+           lives: 3, score: 0, invincible: 0 };
+}
