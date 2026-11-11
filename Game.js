@@ -83,3 +83,28 @@ function makePlayer(color, up, down, left, right) {
   return { x: 100, y: 250, color: color, up: up, down: down, left: left, right: right,
            lives: 3, score: 0, invincible: 0 };
 }
+
+function startGame(two) {
+  twoPlayer = two;
+  players = [makePlayer("#ffd34d", "KeyW", "KeyS", "KeyA", "KeyD")];
+  if (two) {
+    players.push(makePlayer("#4dd2ff", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"));
+  }
+  level = 0;
+  loadLevel();
+  state = "play";
+}
+
+function loadLevel() {
+  var L = levels[level];
+  enemies = [];
+  sparks = [];
+  for (var i = 0; i < L.enemies; i++) {
+    var speed = 1.5 + level * 0.5;
+    enemies.push({
+      x: 300 + Math.random() * 450,
+      y: 30 + Math.random() * 440,
+      dx: Math.random() < 0.5 ? speed : -speed,
+      dy: Math.random() < 0.5 ? speed : -speed
+    });
+  }
