@@ -28,7 +28,7 @@ var twoPlayer = false;
 var audio = null;
 var frame = 0;
 
-// ---------- SOUND (made with code, so no copyright issues) ----------
+// ---------- SOUND (made with code, so no copyright issues) ---------- AI
 function beep(freq, length, volume) {
   if (!audio) return;
   var osc = audio.createOscillator();
@@ -117,7 +117,7 @@ for (var j = 0; j < L.sparks; j++) {
     players[k].invincible = 60;
   }
 }
-// ---------- UPDATE (runs every frame) ----------
+// ---------- UPDATE (runs every frame) ----------AI
 function update() {
   var alive = 0;
 
@@ -198,7 +198,7 @@ function update() {
 }
 
 
-// ---------- DRAW ----------
+// ---------- DRAW ---------- AI
 function text(words, x, y, size, align) {
   ctx.fillStyle = "white";
   ctx.font = size + "px Arial";
@@ -295,7 +295,7 @@ function draw() {
   }
 }
 
-// ---------- KEYBOARD ----------
+// ---------- KEYBOARD ---------- 
 document.addEventListener("keydown", function (e) {
   keys[e.code] = true;
   if (!audio) audio = new AudioContext();   // browsers need a key press before sound
