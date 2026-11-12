@@ -108,3 +108,91 @@ function loadLevel() {
       dy: Math.random() < 0.5 ? speed : -speed
     });
   }
+for (var j = 0; j < L.sparks; j++) {
+    sparks.push(freeSpot());
+  }
+  for (var k = 0; k < players.length; k++) {
+    players[k].x = 100;
+    players[k].y = 200 + k * 100;
+    players[k].invincible = 60;
+  }
+}
+// ---------- UPDATE (runs every frame) ----------
+function update() {
+  var alive = 0;
+
+  for (var i = 0; i < players.length; i++) {
+    var p = players[i];
+    if (p.lives <= 0) continue;
+    alive++;
+
+    // movement (4 pixels per frame), blocked by rocks
+    var nx = p.x;
+    var ny = p.y;
+    if (keys[p.left]) nx -= 4;
+    if (keys[p.right]) nx += 4;
+    if (keys[p.up]) ny -= 4;
+    if (keys[p.down]) ny += 4;
+    if (!hitsRock(nx, p.y)) p.x = nx;
+    if (!hitsRock(p.x, ny)) p.y = ny;
+
+    // stay inside the screen
+    p.x = Math.max(12, Math.min(788, p.x));
+    p.y = Math.max(12, Math.min(488, p.y));
+
+    if (p.invincible > 0) p.invincible--;
+
+    // collect sparks
+    for (var j = sparks.length - 1; j >= 0; j--) {
+      if (distance(p, sparks[j]) < 22) {
+        sparks.splice(j, 1);
+        p.score += 10;
+        beep(880, 0.1, 0.15);
+      }
+    }
+
+    // touching a shadow costs a life
+    if (p.invincible == 0) {
+      for (var k = 0; k < enemies.length; k++) {
+        if (distance(p, enemies[k]) < 28) {
+          p.lives--;
+          p.invincible = 90;
+          p.x = 100;
+          beep(120, 0.4, 0.2);
+          break;
+        }
+      }
+    }
+  }
+
+  // move shadows and bounce them off the edges
+  for (var m = 0; m < enemies.length; m++) {
+    var e = enemies[m];
+    e.x += e.dx;
+    e.y += e.dy;
+    if (e.x < 15 || e.x > 785) e.dx = -e.dx;
+    if (e.y < 15 || e.y > 485) e.dy = -e.dy;
+  }
+
+  // everyone out of lives: game over, then restart automatically
+  if (alive == 0) {
+    state = "over";
+    setTimeout(function () { startGame(twoPlayer); }, 3000);
+    return;
+  }
+
+  // all sparks collected: next level (or win)
+  if (sparks.length == 0) {
+    for (var n = 0; n < players.length; n++) {
+      if (players[n].lives > 0) players[n].score += 50;
+    }
+    beep(660, 0.4, 0.2);
+    if (level == 2) {
+      state = "win";
+      setTimeout(function () { state = "menu"; }, 5000);
+    } else {
+      level++;
+      loadLevel();
+    }
+  }
+}
