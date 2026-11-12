@@ -294,3 +294,26 @@ function draw() {
     text("YOU WIN! The forest is bright again", 400, 250, 36, "center");
   }
 }
+
+// ---------- KEYBOARD ----------
+document.addEventListener("keydown", function (e) {
+  keys[e.code] = true;
+  if (!audio) audio = new AudioContext();   // browsers need a key press before sound
+  if (e.code.indexOf("Arrow") == 0) e.preventDefault();
+  if (state == "menu") {
+    if (e.code == "Digit1") startGame(false);
+    if (e.code == "Digit2") startGame(true);
+  }
+});
+document.addEventListener("keyup", function (e) {
+  keys[e.code] = false;
+});
+
+// ---------- GAME LOOP ----------
+function loop() {
+  frame++;
+  if (state == "play") update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
