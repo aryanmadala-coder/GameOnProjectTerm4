@@ -196,3 +196,101 @@ function update() {
     }
   }
 }
+
+
+// ---------- DRAW ----------
+function text(words, x, y, size, align) {
+  ctx.fillStyle = "white";
+  ctx.font = size + "px Arial";
+  ctx.textAlign = align;
+  ctx.fillText(words, x, y);
+}
+
+function draw() {
+  if (state == "menu") {
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0, 0, 800, 500);
+    text("LANTERN SPIRITS", 400, 150, 50, "center");
+    text("Collect every spark. Shadows hide in the dark!", 400, 200, 20, "center");
+    text("Press 1 for ONE player   -   Press 2 for TWO players", 400, 270, 22, "center");
+    text("Player 1: W A S D        Player 2: Arrow keys", 400, 320, 18, "center");
+    return;
+  }
+
+  var L = levels[level];
+
+  // background
+  ctx.fillStyle = L.bg;
+  ctx.fillRect(0, 0, 800, 500);
+
+  // shadows (these get hidden by the darkness)
+  for (var i = 0; i < enemies.length; i++) {
+    var e = enemies[i];
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, 18, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "red";
+    ctx.fillRect(e.x - 9, e.y - 5, 5, 5);
+    ctx.fillRect(e.x + 4, e.y - 5, 5, 5);
+  }
+
+  // darkness: fill black, then cut a glowing hole around each player
+  dctx.globalCompositeOperation = "source-over";
+  dctx.fillStyle = "rgba(0,0,0,0.96)";
+  dctx.fillRect(0, 0, 800, 500);
+  dctx.globalCompositeOperation = "destination-out";
+  for (var p = 0; p < players.length; p++) {
+    var pl = players[p];
+    if (pl.lives <= 0) continue;
+    var g = dctx.createRadialGradient(pl.x, pl.y, 10, pl.x, pl.y, L.light);
+    g.addColorStop(0, "rgba(0,0,0,1)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    dctx.fillStyle = g;
+    dctx.fillRect(0, 0, 800, 500);
+  }
+  ctx.drawImage(dark, 0, 0);
+
+  // rocks (always visible)
+  ctx.fillStyle = "#777";
+  for (var r = 0; r < L.rocks.length; r++) {
+    var rock = L.rocks[r];
+    ctx.fillRect(rock[0], rock[1], rock[2], rock[3]);
+  }
+
+  // sparks (always visible, they pulse)
+  ctx.fillStyle = "#fff176";
+  for (var s = 0; s < sparks.length; s++) {
+    ctx.beginPath();
+    ctx.arc(sparks[s].x, sparks[s].y, 6 + Math.sin(frame / 8) * 2, 0, 7);
+    ctx.fill();
+  }
+
+  // players (flash when recently hit)
+  for (var q = 0; q < players.length; q++) {
+    var a = players[q];
+    if (a.lives <= 0) continue;
+    if (a.invincible > 0 && frame % 10 < 5) continue;
+    ctx.fillStyle = a.color;
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, 12, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.fillRect(a.x - 6, a.y - 4, 4, 4);
+    ctx.fillRect(a.x + 2, a.y - 4, 4, 4);
+  }
+
+  // scoreboard
+  text("P1  Lives: " + players[0].lives + "  Score: " + players[0].score, 10, 25, 16, "left");
+  if (twoPlayer) {
+    text("P2  Lives: " + players[1].lives + "  Score: " + players[1].score, 790, 25, 16, "right");
+  }
+  text("Level " + (level + 1) + "   Sparks left: " + sparks.length, 400, 25, 16, "center");
+
+  if (state == "over") {
+    text("GAME OVER - restarting...", 400, 250, 40, "center");
+  }
+  if (state == "win") {
+    text("YOU WIN! The forest is bright again", 400, 250, 36, "center");
+  }
+}
